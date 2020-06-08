@@ -1,0 +1,35 @@
+# django_adtools/.gitignore
+# author: shmakovpn <shmakovpn@yandex.ru>
+# date: 2020-06-05
+
+.idea/
+venv/
+migrations/
+*.pyc
+
+# some temporary files
+temp.py
+temp.html
+notes
+
+#
+dist/
+__pycache__/
+*.egg-info/
+.eggs/
+
+# sphinx files
+docs/build/html/
+docs/build/doctrees/
+_build
+_static
+_templates
+
+# django project files
+db.sqlite3
+adtools/
+manage.py
+templates/
+
+# deployment files
+uwsgi.ini

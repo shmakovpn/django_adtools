@@ -1,0 +1,2 @@
+prune adtools
+prune django_adtools/migrations
