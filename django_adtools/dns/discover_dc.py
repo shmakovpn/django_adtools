@@ -9,7 +9,7 @@ REQUIREMENTS:
 __author__ = "shmakovpn <shmakovpn@yandex.ru>"
 __date__ = "2020-03-04"
 
-from typing import List
+from typing import List, Optional
 import re
 import dns.resolver
 import socket
@@ -23,23 +23,22 @@ Pattern to match an IPv4 address
 class DCHostname:
     """
     Hostname of the Domain Controller
+
+    :param dc_hostname: a hostname or an ip address of the Domain Controller
+    :type dc_hostname: str
+    :param dc_priority:
+    :type dc_priority: int
+    :param dc_port:
+    :type dc_port: int
+    :param dns_resolver:
+    :type dns_resolver: dns.resolver.Resolver, optional
     """
     def __init__(self,
                  dc_hostname: str,
                  dc_priority: int,
                  dc_port: int = 389,
-                 dns_resolver: dns.resolver.Resolver = None
+                 dns_resolver: Optional[dns.resolver.Resolver] = None
                  ):
-        """
-        :param dc_hostname: a hostname or an ip address of the Domain Controller
-        :type dc_hostname: str
-        :param dc_priority:
-        :type dc_priority: int
-        :param dc_port:
-        :type dc_port: int
-        :param dns_resolver:
-        :type dns_resolver: dns.resolver.Resolver
-        """
         self.dc_hostname: str = dc_hostname
         self.dc_priority: int = dc_priority
         self.dc_port: int = dc_port
@@ -49,6 +48,7 @@ class DCHostname:
     def dc_ping(self) -> bool:
         """
         Checks that this domain controller host is available
+
         :return: True if this domain controller host is available
         :rtype: bool
         """
@@ -75,28 +75,22 @@ class DCHostname:
 
 class DCList:
     """
-    Date:
-        2020-03-04
-
     List of domain controllers
+
+    :param domain:
+    :type domain: str
+    :param role:
+    :type role: str
+    :param record_type:
+    :type record_type: str
+    :param name_servers:
+    :type name_servers: list of str
     """
     def __init__(self, domain: str, role: str = 'dc', record_type: str = 'SRV', name_servers: List[str] = None):
-        """
-        2020-03-04
-        :param domain:
-        :type domain: str
-        :param role:
-        :type role: str
-        :param record_type:
-        :type record_type: str
-        :param name_servers:
-        :type name_servers: list of str
-        """
         self.domain: str = domain
         self.role: str = role
         self.record_type: str = record_type
         self.dns_resolver: dns.resolver.Resolver = dns.resolver.get_default_resolver()
-        # self.dns_resolver: dns.resolver.Resolver = dns.resolver.Resolver()
         self.name_servers: List[str] = name_servers
         if name_servers:
             self.dns_resolver.nameservers = name_servers
@@ -104,6 +98,7 @@ class DCList:
     def get_dns_query_string(self) -> str:
         """
         Creates a dns query string
+
         :return: dns query string
         :rtype: str
         """
@@ -112,8 +107,9 @@ class DCList:
     def get_dc_list(self) -> List[DCHostname]:
         """
         Returns a list of domain controllers sorted by priority
+
         Note: this function does not check either a domain controller is available or not
-        2020-03-04
+
         :return: a list of domain controllers' host names from DNS request sorted by priority
         :rtype: list of DCHostname
         """
@@ -137,7 +133,7 @@ class DCList:
     def get_available_dc_ip(self) -> str:
         """
         Returns a hostname of an available domain controller or empty string
-        2020-03-04
+
         :return: a hostname of an available domain controller or empty string
         :rtype: str
         """

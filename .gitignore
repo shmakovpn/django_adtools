@@ -33,3 +33,6 @@ templates/
 
 # deployment files
 uwsgi.ini
+
+# examples
+ad_example/

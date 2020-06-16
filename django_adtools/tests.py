@@ -27,7 +27,7 @@ class TestDiscoverDC(TestCase):
         name_servers: Optional[List[str]] = getattr(settings, 'ADTOOLS_NAMESERVERS', None)
         if os.name == 'nt':
             self.assertIsNotNone(name_servers, "'ADTOOLS_NAMESERVERS' does not present in settings.py on Windows")
-        dcs = django_adtools.dns.discover_dc.DCList(domain='shmakovpn.ru', name_servers=name_servers)
+        dcs = django_adtools.dns.discover_dc.DCList(domain=domain, name_servers=name_servers)
         dc_list = dcs.get_dc_list()
         self.assertIsNotNone(dc_list, 'Could not get a list of Domain Controllers')
         dc: str = dcs.get_available_dc_ip()

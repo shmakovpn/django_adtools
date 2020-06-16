@@ -13,8 +13,6 @@ __date__ = "2020-04-15"
 import re
 import ldap
 import ldap.filter
-
-
 from typing import TypeVar, List
 
 domain_suffix_pattern = re.compile(r'@.*$')  #: pattern for domain suffix
@@ -25,7 +23,7 @@ LDAP_CONNECTION = TypeVar('LDAP_CONNECTION', ldap.ldapobject.SimpleLDAPObject, t
 def ad_clear_username(username: str) -> str:
     """
     Removes domain suffix and prefix from the username
-    2020-04-15
+
     :param username: active directory username
     :type username: str
     :return: cleared username without domain suffix and prefix
@@ -39,7 +37,7 @@ def ad_clear_username(username: str) -> str:
 def ldap_conn(dc: str, username: str, password: str) -> LDAP_CONNECTION:
     """
     Inits ldap connection, binds to ldap using username and password, returns ldap connection if binding was ok
-    2020-04-15
+
     :param dc: an ip address of domain controller
     :type dc: str
     :param username: an active directory username
@@ -65,6 +63,7 @@ def ldap_conn(dc: str, username: str, password: str) -> LDAP_CONNECTION:
 def user_dn(conn: ldap.ldapobject.SimpleLDAPObject, username: str, domain: str) -> str:
     """
     Requests user DN from active directory by username
+
     :param conn: established connection to domain controller
     :type conn: ldap.ldapobject.SimpleLDAPObject
     :param username: an active directory username
@@ -92,7 +91,7 @@ def user_dn(conn: ldap.ldapobject.SimpleLDAPObject, username: str, domain: str) 
 def dn_groups(conn: ldap.ldapobject.SimpleLDAPObject, dn: str, domain: str) -> List[str]:
     """
     Request group names from active directory by user DN
-    2020-04-15
+
     :param conn: established connection to domain controller
     :type conn: ldap.ldapobject.SimpleLDAPObject
     :param dn: an active directory user DN
@@ -116,3 +115,49 @@ def dn_groups(conn: ldap.ldapobject.SimpleLDAPObject, dn: str, domain: str) -> L
         return [item[1]['sAMAccountName'][0].decode() for item in results]
     except ldap.OPERATIONS_ERROR:
         return []
+
+
+def ad_login(dc: str, username: str, password: str, domain: str, group: str) -> bool:
+    """
+    Returns true if the user can log in and is included in the desired group
+
+    :param dc: hostname or ip address of a domain controller
+    :type dc: str
+    :param username:
+    :type username: str
+    :param password:
+    :type password: str
+    :param domain: a name of domain, e.g. example.com
+    :type domain: str
+    :param group: a name of valid domain group, if an user is in this group, then it can log in
+    :type group: str
+    :return: true if the user can log in and is included in the desired group
+    :rtype: bool
+    """
+    if not dc:
+        return False
+    conn = ldap_conn(
+        dc=dc,
+        username=username,
+        password=password,
+    )
+    if not conn:
+        return False
+    dn = user_dn(
+        conn=conn,
+        username=username,
+        domain=domain,
+    )
+    if not dn:
+        return False
+    groups = dn_groups(
+        conn=conn,
+        dn=dn,
+        domain=domain,
+    )
+    if not groups:
+        return False
+    if group in groups:
+        return True
+    else:
+        return False

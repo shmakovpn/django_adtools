@@ -14,10 +14,7 @@ from django_adtools.version import VERSION
 SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(SCRIPT_DIR)
 
-DOCS_DIR: str = os.path.join(SCRIPT_DIR, 'docs')
-DOCS_SOURCE_DIR: str = os.path.join(DOCS_DIR, 'source')
-
-with open(os.path.join(DOCS_SOURCE_DIR, 'introduction.rst')) as f:
+with open('README.rst') as f:
     long_description: str = f.read()
 
 setup(

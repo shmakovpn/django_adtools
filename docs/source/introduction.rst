@@ -7,3 +7,6 @@ MS ActiveDirectory.
 
 All documentation is in the "``docs/build``" directory and online at
 http://django-adtools.readthedocs.org
+
+todo Add short usage example
+def post(self, request)
