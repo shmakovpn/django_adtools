@@ -13,17 +13,12 @@
 import os
 import sys
 
-# sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(
-    0,
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(
-                os.path.abspath(__file__)
-            )
-        )
-    )
-)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DOCS_DIR = os.path.dirname(SCRIPT_DIR)
+PACKAGE_DIR = os.path.dirname(DOCS_DIR)
+PROJECT_DIR = os.path.dirname(PACKAGE_DIR)
+sys.path.insert(0, PROJECT_DIR)
+
 from django_adtools.version import VERSION
 
 
@@ -68,3 +63,6 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
+autodoc_mock_imports = ["ldap"]
