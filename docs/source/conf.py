@@ -15,8 +15,7 @@ import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_DIR = os.path.dirname(SCRIPT_DIR)
-PACKAGE_DIR = os.path.dirname(DOCS_DIR)
-PROJECT_DIR = os.path.dirname(PACKAGE_DIR)
+PROJECT_DIR = os.path.dirname(DOCS_DIR)
 sys.path.insert(0, PROJECT_DIR)
 
 from django_adtools.version import VERSION
