@@ -20,7 +20,7 @@ sys.path.insert(0, PROJECT_DIR)
 
 # todo
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-#autodoc_mock_imports = ["ldap"]
+autodoc_mock_imports = ["ldap"]
 
 # todo
 # from django_adtools.version import VERSION
