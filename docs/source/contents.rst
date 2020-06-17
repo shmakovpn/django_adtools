@@ -4,6 +4,7 @@
 
    introduction
    installation
+   configuration
    examples
    api
    centos7

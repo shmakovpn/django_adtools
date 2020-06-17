@@ -24,16 +24,7 @@ Usage Examples
 
  Edit /var/www/$PROJECT_NAME/$PROJECT_NAME/settings.py. Add *ADTOOLS* setting
 
-  .. code-block:: python
-
-   # DJANGO_ADTOOLS
-   ADTOOLS_DOMAIN: str = 'domain.com'  #: name of a windows domain
-   ADTOOLS_GROUP: str = 'your-group'  #: name of a group of valid users
-   # set list of dns servers if your server work under Windows
-   # ADTOOLS_NAMESERVERS: List[str] = ['127.0.0.1']  #: list of dns servers to discover ip addresses of domain controllers
-   ADTOOLS_TEST_USERNAME: str = 'userSpy@shmakovpn.ru'  #: test ad username, set it if you want to run tests
-   ADTOOLS_TEST_PASSWORD: str = 'a-123456'  #: test ad password, set it if you want to run tests
-   ADTOOLS_TEST_GROUP: str = 'krw-userspy-users'  #: test ad group, set if if you want to run tests
+ .. include:: chunks/settings_adtools.rst
 
  Create and apply migrations
 
