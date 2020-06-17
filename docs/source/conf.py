@@ -18,11 +18,11 @@ DOCS_DIR = os.path.dirname(SCRIPT_DIR)
 PROJECT_DIR = os.path.dirname(DOCS_DIR)
 sys.path.insert(0, PROJECT_DIR)
 
+# todo
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-autodoc_mock_imports = ["ldap"]
+#autodoc_mock_imports = ["ldap"]
 
-#from django_adtools.version import VERSION
-VERSION='1.3'
+from django_adtools.version import VERSION
 
 
 # -- Project information -----------------------------------------------------
