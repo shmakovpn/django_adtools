@@ -18,19 +18,25 @@ DOCS_DIR = os.path.dirname(SCRIPT_DIR)
 PROJECT_DIR = os.path.dirname(DOCS_DIR)
 sys.path.insert(0, PROJECT_DIR)
 
-# todo
+# mocking C modules
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
 autodoc_mock_imports = ["ldap"]
-
-# todo
-# from django_adtools.version import VERSION
-VERSION = '1.3'
 
 
 # -- Project information -----------------------------------------------------
 project = 'django_adtools'
 copyright = '2020, shmakovpn'
 author = 'shmakovpn'
+
+# reading version information
+# NOTE:
+# "from django_adtools.version import VERSION" will no work
+# because of "autodoc_mock_imports = [list of C modules]" will run
+# after importing, but "ldap" package is not installed on readthedocs.io
+PACKAGE_DIR = os.path.join(PROJECT_DIR, project)
+VERSION = None
+with open(os.path.join(PACKAGE_DIR, 'version.py'), 'r') as version_file:
+    exec(version_file.read())
 
 # The short X.Y version
 version = VERSION
