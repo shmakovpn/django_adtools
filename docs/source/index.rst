@@ -3,7 +3,15 @@ Welcome to Django-adtools's documentation!
 
 .. include:: introduction.rst
 
-.. include:: contents.rst
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   installation
+   configuration
+   examples
+   api
+   centos7
 
 Indices and tables
 ==================
