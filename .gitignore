@@ -12,7 +12,7 @@ temp.py
 temp.html
 notes
 
-#
+# setuptools
 dist/
 __pycache__/
 *.egg-info/
@@ -34,8 +34,6 @@ templates/
 # deployment files
 uwsgi.ini
 
-# examples
+# applications
 ad_example/
-
-# todo
-todo
+logging_example/

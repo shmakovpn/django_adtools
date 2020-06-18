@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.test import override_settings
 from django.conf import settings
 from typing import List, Optional
 import os
@@ -55,7 +56,7 @@ class TestDomainControllerModel(TestCase):
 
 
 class TestManagementCommands(TestCase):
-    def test_discovery(self):
+    def test_discovery(self) -> None:
         """
         Tests 'python manage.py discover' command
         :return:
@@ -63,9 +64,20 @@ class TestManagementCommands(TestCase):
         out = StringIO()
         result = call_command('discover', stdout=out)
         self.assertIsNone(result)
-        self.assertEqual(out.read(), '')
+        self.assertEqual(out.getvalue(), '')
         dc: str = DomainController.get()
         self.assertIsNotNone(dc)
+
+    # todo change settings for django logger, for StreamWritter logger, from stderr to custom StringIO()
+    @override_settings(DEBUG=True)
+    def test_logger(self) -> None:
+        err = StringIO()
+        out = StringIO()
+        result = call_command('logger', 'error', 'hello world', stderr=err, stdout=out)
+        print(f'settings.DEBUG={settings.DEBUG}')
+        print(f'result={result}')
+        print(f'stderr={err.getvalue()}')
+        print(f'stdout={out.getvalue()}')
 
 
 class TestADTools(TestCase):

@@ -1,2 +1,4 @@
 prune adtools
+prune ad_example
+prune logging_example
 prune django_adtools/migrations

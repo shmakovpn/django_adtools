@@ -12,6 +12,7 @@ Welcome to Django-adtools's documentation!
    examples
    api
    centos7
+   logging
 
 Indices and tables
 ==================
