@@ -37,3 +37,6 @@ uwsgi.ini
 # applications
 ad_example/
 logging_example/
+
+# codecov
+.coverage

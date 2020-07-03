@@ -15,8 +15,6 @@ install:
   - python manage.py migrate
   - pip install codecov
   - pip install pytest-cov
-  - pwd
-  - ls -al
-script: coverage run -m pytest django_adtools/tests.py
+script: coverage run manage.py test
 after_success:
   - codecov
