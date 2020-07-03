@@ -1,13 +1,16 @@
 from django.test import TestCase
 from django.test import override_settings
 from django.conf import settings
-from typing import List, Optional
+from typing import List, Optional, TextIO
 import os
 import django_adtools.dns
 import django_adtools.ad
+import logging
+from django_adtools import logger
 from .models import *
 from io import StringIO
 from django.core.management import call_command
+import slapdtest
 
 
 # Create your tests here.
@@ -15,7 +18,6 @@ class TestDiscoverDC(TestCase):
     def test_re_ip(self):
         """
         Tests re_ip regex pattern to match ipv4 addresses only
-        :return: None
         """
         re_ip = django_adtools.dns.discover_dc.re_ip
         self.assertIsNotNone(re_ip.search('127.0.0.1'))
@@ -42,7 +44,6 @@ class TestSettings(TestCase):
     def test_installed_apps(self):
         """
         Checks that 'django_adtools' are in INSTALLED_APPS
-        :return: None
         """
         self.assertIn(__package__, settings.INSTALLED_APPS)
 
@@ -59,7 +60,6 @@ class TestManagementCommands(TestCase):
     def test_discovery(self) -> None:
         """
         Tests 'python manage.py discover' command
-        :return:
         """
         out = StringIO()
         result = call_command('discover', stdout=out)
@@ -68,16 +68,15 @@ class TestManagementCommands(TestCase):
         dc: str = DomainController.get()
         self.assertIsNotNone(dc)
 
-    # todo change settings for django logger, for StreamWritter logger, from stderr to custom StringIO()
     @override_settings(DEBUG=True)
     def test_logger(self) -> None:
-        err = StringIO()
-        out = StringIO()
-        result = call_command('logger', 'error', 'hello world', stderr=err, stdout=out)
-        print(f'settings.DEBUG={settings.DEBUG}')
-        print(f'result={result}')
-        print(f'stderr={err.getvalue()}')
-        print(f'stdout={out.getvalue()}')
+        out: StringIO = StringIO()
+        handler: logging.StreamHandler = logging.StreamHandler(stream=out)
+        logger.addHandler(hdlr=handler)
+        message: str = 'some test log message'
+        logger.error(message)
+        logger.removeHandler(hdlr=handler)
+        self.assertEqual(out.getvalue().rstrip(), message)
 
 
 class TestADTools(TestCase):

@@ -26,6 +26,4 @@ class Command(BaseCommand):
         log_level: str = options['log_level'][0]
         message: str = ' '.join(options['message'])
         logger.log(getattr(logging, log_level.upper()), '%s', message)
-        print(f'log_level={log_level}, message={message}')
-        self.stdout.write('some hello from stdout')
-        self.stderr.write('some error')
+
