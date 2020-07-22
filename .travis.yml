@@ -8,8 +8,9 @@ jobs:
         - pip install dnspython
         - pip install python-ldap
 install:
-  - cat /etc/os-release
-  - dpkg-query -L libldap2-dev | grep lber
+  # - cat /etc/os-release
+  # - dpkg-query -L libldap2-dev | grep lber
+  - echo $PATH
   - pip install -r requirements.txt
   - django-admin startproject adtools .
   - echo "INSTALLED_APPS.append('django_adtools')" >> adtools/settings.py

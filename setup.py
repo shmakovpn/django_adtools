@@ -35,6 +35,7 @@ setup(
         'python-ldap',
         'dnslib',  # using in tests like DNS Server emulator
         'unittest-dataprovider',  # using in tests like PHP @dataprovider
+        # 'python-ldap-test',  # using in test like LDAP Server emulator
     ],
     include_package_data=True,
     # test_suite='tests',

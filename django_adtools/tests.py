@@ -14,12 +14,17 @@ from django_adtools.dns.discover_dc import DCList, re_ip
 from dnslib.zoneresolver import ZoneResolver
 from dnslib.server import DNSServer
 
+# emulaiton of a LDAP Server
+from ldaptools import slapd
+#from ldap_test import LdapServer
+
 # import logging
 # from django_adtools import logger
 # from .models import *
 # from io import StringIO
 # from django.core.management import call_command
-import slapdtest
+
+## import slapdtest # requires ldapadd and does not work without it
 
 # the simple DNS zone file for testing getting SRV records from dnslib.DNSServer (the python emulator of DNS Server)
 zone_file: str = """
@@ -67,10 +72,13 @@ class TestDiscoverDC(TestCase):
 
     @data_provider(srv_addresses)
     def test_discover(self, srv_address: str):
-        # setups the LDAP Server emulator
-        import ldap
-        with slapdtest.SlapdObject() as ldap_server:
-            print(ldap_server)
+
+        # setups the LDAP Server emulator, slapdtest.SlapdObject requires ldapadd and does not work without it
+        # with slapdtest.SlapdObject() as ldap_server:
+        #     print(ldap_server)
+
+        # ldap_server = LdapServer()  # зависает
+        # slapd_server = slapd.Slapd()
 
         name_servers: List[str] = ['127.0.0.1']  # the list of nameservers
         # configures the DNS Server
