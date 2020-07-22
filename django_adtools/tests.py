@@ -68,6 +68,7 @@ class TestDiscoverDC(TestCase):
     @data_provider(srv_addresses)
     def test_discover(self, srv_address: str):
         # setups the LDAP Server emulator
+        import ldap
         with slapdtest.SlapdObject() as ldap_server:
             print(ldap_server)
 

@@ -19,5 +19,13 @@ Windows 10
 
 Linux
 -----
+ Install linux packages
 
- *pip install django-adtools*
+  | *sudo yum -y install gcc*
+  | *sudo yum -y install python36-devel* # if your python version is 3.6
+  | *sudo yum -y install openldap-devel*
+
+ Install python packages
+
+  | *pip install django-adtools*
+
