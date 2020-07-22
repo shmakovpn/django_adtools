@@ -13,6 +13,7 @@ install:
   - echo $PATH
   - echo $HOME
   - whoami
+  - sudo whoami
   - pip install -r requirements.txt
   - django-admin startproject adtools .
   - echo "INSTALLED_APPS.append('django_adtools')" >> adtools/settings.py
