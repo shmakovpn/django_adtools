@@ -14,7 +14,9 @@ import re
 import dns.resolver
 import socket
 
-re_ip = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
+re_ip = re.compile(
+    r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
+)
 """
 Pattern to match an IPv4 address
 """
@@ -33,11 +35,12 @@ class DCHostname:
     :param dns_resolver:
     :type dns_resolver: dns.resolver.Resolver, optional
     """
+
     def __init__(self,
                  dc_hostname: str,
                  dc_priority: int,
-                 dc_port: int = 389,
-                 dns_resolver: Optional[dns.resolver.Resolver] = None
+                 dc_port: int,
+                 dns_resolver: dns.resolver.Resolver,
                  ):
         self.dc_hostname: str = dc_hostname
         self.dc_priority: int = dc_priority
@@ -52,57 +55,76 @@ class DCHostname:
         :return: True if this domain controller host is available
         :rtype: bool
         """
-        hosts: List[str] = [getattr(self, 'dc_ip', self.dc_hostname), ]
-        if not self.dc_ip and not re_ip.search(self.dc_hostname) and self.dns_resolver:
+        if not self.dc_ip and re_ip.search(self.dc_hostname):
+            self.dc_ip = self.dc_hostname
+        if self.dc_ip:
+            dc_ips: List[str] = [self.dc_ip]  # ip addresses of Domain Controllers
+        else:
+            dc_ips: List[str] = []  # ip addresses of Domain controllers need to be resolved using self.dc_hostname
+        if not dc_ips:
             # resolve hostname
             try:
                 dns_answer: dns.resolver.Answer = self.dns_resolver.query(self.dc_hostname)
                 answers: List[dns.rdtypes.IN.A.A] = list(dns_answer)
-                hosts: List[str] = [answer.address for answer in answers]
+                dc_ips: List[str] = [answer.address for answer in answers]
             except dns.exception.DNSException as e:
                 raise dns.exception.DNSException(e)
         sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        for host in hosts:
+        for dc_ip in dc_ips:
             try:
-                if sock.connect_ex((host, self.dc_port,)) == 0:
-                    self.dc_ip = host
+                if sock.connect_ex((dc_ip, self.dc_port,)) == 0:
+                    self.dc_ip = dc_ip
                     return True
             except socket.gaierror:
                 pass
         sock.close()
         return False
 
+    def __str__(self):
+        return f"DCHostname" + \
+               f"(dc_hostname='{self.dc_hostname}', dc_priority='{self.dc_priority}', dc_port='{self.dc_port}'," + \
+               f"dc_ip={self.dc_ip if self.dc_ip else 'None'})"
+
 
 class DCList:
     """
     List of domain controllers
 
-    :param domain:
+    :param domain: A name of a domain to discover, e.g. **example.com**
     :type domain: str
-    :param role:
+    :param role: A role of server to discover, defaults to **dc**
     :type role: str
-    :param record_type:
+    :param record_type: A type of DNS record to discover, defaults to **SRV**
     :type record_type: str
-    :param name_servers:
-    :type name_servers: list of str
+    :param nameservers: A list of nameservers, defaults to **None** (Warning: **None** does not work in Windows)
+    :type nameservers: list of str
+    :param port: A port number used in DNS requests, defaults to 53
+    :type port: int
     """
-    def __init__(self, domain: str, role: str = 'dc', record_type: str = 'SRV', name_servers: List[str] = None):
+
+    def __init__(
+            self,
+            domain: str,
+            role: str = 'dc',
+            record_type: str = 'SRV',
+            nameservers: List[str] = None,
+            port: int = 53,
+    ):
         self.domain: str = domain
         self.role: str = role
         self.record_type: str = record_type
         self.dns_resolver: dns.resolver.Resolver = dns.resolver.get_default_resolver()
-        self.name_servers: List[str] = name_servers
-        if name_servers:
-            self.dns_resolver.nameservers = name_servers
+        self.dns_resolver.nameservers = nameservers
+        self.dns_resolver.port = port
 
     def get_dns_query_string(self) -> str:
         """
-        Creates a dns query string
+        Creates a dns query string to discover Domain Controllers
 
         :return: dns query string
         :rtype: str
         """
-        return '_ldap._tcp.%s._msdcs.%s' % (self.role, self.domain, )
+        return '_ldap._tcp.%s._msdcs.%s' % (self.role, self.domain,)
 
     def get_dc_list(self) -> List[DCHostname]:
         """

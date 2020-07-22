@@ -29,5 +29,5 @@ class Command(BaseCommand):
         """
         Perform dns requests
         """
-        ip: str = DCList(domain=domain, role=role, name_servers=name_servers).get_available_dc_ip()
+        ip: str = DCList(domain=domain, role=role, nameservers=name_servers).get_available_dc_ip()
         DomainController.set(ip)

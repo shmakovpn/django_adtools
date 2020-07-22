@@ -1,0 +1,5 @@
+django
+dnspython
+python-ldap
+dnslib
+unittest-dataprovider

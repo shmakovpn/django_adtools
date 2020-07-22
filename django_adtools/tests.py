@@ -1,52 +1,108 @@
-from django.test import TestCase
-from django.test import override_settings
 from django.conf import settings
-from typing import List, Optional, TextIO
-import os
-import django_adtools.dns
-import django_adtools.ad
-import logging
-from django_adtools import logger
-from .models import *
-from io import StringIO
-from django.core.management import call_command
+from typing import List, Tuple, ContextManager, Optional, TextIO
+# import os
+
+# testing libraries
+from django.test import TestCase, override_settings
+from unittest_dataprovider import data_provider
+
+# django_adtools
+# import django_adtools.ad
+from django_adtools.dns.discover_dc import DCList, re_ip
+
+# emulation of a DNS Server
+from dnslib.zoneresolver import ZoneResolver
+from dnslib.server import DNSServer
+
+# import logging
+# from django_adtools import logger
+# from .models import *
+# from io import StringIO
+# from django.core.management import call_command
 import slapdtest
 
+# the simple DNS zone file for testing getting SRV records from dnslib.DNSServer (the python emulator of DNS Server)
+zone_file: str = """
+{domain}.               600   IN   SOA   localhost localhost ( 2007120710 1d 2h 4w 1h )
+{domain}.               400   IN   NS    localhost
+{domain}.               600   IN   A     127.0.0.1
+controller.{domain}.          IN   A     127.0.0.1
+_ldap._tcp.dc._msdcs.{domain}.    600   IN   SRV   1 10 {port} {srv_address}."""
 
-# Create your tests here.
-# class TestDiscoverDC(TestCase):
-#     def test_re_ip(self):
-#         """
-#         Tests re_ip regex pattern to match ipv4 addresses only
-#         """
-#         re_ip = django_adtools.dns.discover_dc.re_ip
-#         self.assertIsNotNone(re_ip.search('127.0.0.1'))
-#         self.assertIsNotNone(re_ip.search('10.1.2.3'))
-#         self.assertIsNone(re_ip.search('256.255.255.0'))
-#
-#     def test_discover(self):
-#         domain: str = getattr(settings, 'ADTOOLS_DOMAIN', None)
-#         self.assertIsNotNone(domain, "'ADTOOLS_DOMAIN' does not present in settings.py")
-#         name_servers: Optional[List[str]] = getattr(settings, 'ADTOOLS_NAMESERVERS', None)
-#         if os.name == 'nt':
-#             self.assertIsNotNone(name_servers, "'ADTOOLS_NAMESERVERS' does not present in settings.py on Windows")
-#         dcs = django_adtools.dns.discover_dc.DCList(domain=domain, name_servers=name_servers)
-#         dc_list = dcs.get_dc_list()
-#         self.assertIsNotNone(dc_list, 'Could not get a list of Domain Controllers')
-#         dc: str = dcs.get_available_dc_ip()
-#         self.assertIsNotNone(dc, "Could not get an available Domain Controller")
+domain: str = 'domain.local'  # testing name of the domain
+
+
+class TestDiscoverDC(TestCase):
+    @staticmethod
+    def ip_addresses() -> Tuple[
+        Tuple[str, bool], Tuple[str, bool], Tuple[str, bool], Tuple[str, bool], Tuple[str, bool]
+    ]:
+        """
+        Dataprovider for test_re_ip
+        """
+        return (
+            ('127.0.0.1', True,),
+            ('10.1.2.3', True,),
+            ('256.255.255.0', False,),
+            ('something', False,),
+            ('0.0.0.0', True,),
+        )
+
+    @data_provider(ip_addresses)
+    def test_re_ip(self, ip_address: str, is_valid_ip: bool):
+        """
+        Tests re_ip regex pattern to match ipv4 addresses only
+        """
+        self.assertEqual(bool(re_ip.search(ip_address)), is_valid_ip)
+
+    @staticmethod
+    def srv_addresses() -> Tuple[Tuple[str], Tuple[str], ]:
+        """
+        Dataprovider for test_discover
+        """
+        return (
+            (f'controller.{domain}',),
+            ('127.0.0.1',),
+        )
+
+    @data_provider(srv_addresses)
+    def test_discover(self, srv_address: str):
+        # setups the LDAP Server emulator
+        with slapdtest.SlapdObject() as ldap_server:
+            print(ldap_server)
+
+        name_servers: List[str] = ['127.0.0.1']  # the list of nameservers
+        # configures the DNS Server
+        zone_resolver: ZoneResolver = ZoneResolver(
+            zone=zone_file.format(domain=domain, srv_address=srv_address, port=389),
+        )
+        # port=0 means that the DNS Server will choose a free UDP Port
+        dns_server: DNSServer = DNSServer(resolver=zone_resolver, port=0, tcp=False)
+        dns_server.start_thread()  # start the DNS Server in a separate python thread
+        port: int = dns_server.server.server_address[1]  # gets the number of the UDP Port
+        # discover for domain controllers
+        dc_list: DCList = DCList(domain=domain, nameservers=name_servers, port=port)
+        self.assertIsNotNone(dc_list.get_dc_list(), 'Could not get a list of Domain Controllers')
+        # try to get an available domain controller
+        # todo DCHostname.ping need to emulate ldap server!!!
+        dc: str = dc_list.get_available_dc_ip()
+        print(f"dc={dc}")
+        self.assertIsNotNone(dc, "Could not get an available Domain Controller")
+        # stop DNS Server
+        dns_server.server.server_close()
+        dns_server.stop()
 
 
 class TestSettings(TestCase):
     """
     This class contains tests for the settings.py file
     """
+
     def test_installed_apps(self):
         """
         Checks that 'django_adtools' are in INSTALLED_APPS
         """
         self.assertIn(__package__, settings.INSTALLED_APPS)
-
 
 # class TestDomainControllerModel(TestCase):
 #     def test_domain_controller_model(self):
@@ -121,4 +177,3 @@ class TestSettings(TestCase):
 #             self.assertIn(settings.ADTOOLS_TEST_GROUP, groups)
 #
 #
-

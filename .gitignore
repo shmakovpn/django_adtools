@@ -40,3 +40,6 @@ logging_example/
 
 # codecov
 .coverage
+
+# pytest
+.pytest_cache/
