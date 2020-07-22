@@ -11,6 +11,8 @@ install:
   # - cat /etc/os-release
   # - dpkg-query -L libldap2-dev | grep lber
   - echo $PATH
+  - echo $HOME
+  - whoami
   - pip install -r requirements.txt
   - django-admin startproject adtools .
   - echo "INSTALLED_APPS.append('django_adtools')" >> adtools/settings.py
