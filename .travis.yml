@@ -1,5 +1,10 @@
 language: python
 sudo: false
+#addons:
+#  apt:
+#    packages:
+#      - ldap-utils  # provides 'ldapadd' for slapdtest.SlapdObjec
+#      - slapd  # provides 'slapd' for slapdtest.SlapdObject
 jobs:
   include:
     - name: "Python 3.6 on Linux"

@@ -34,7 +34,7 @@ def ad_clear_username(username: str) -> str:
     return username
 
 
-def ldap_conn(dc: str, username: str, password: str) -> LDAP_CONNECTION:
+def ldap_connect(dc: str, username: str, password: str) -> LDAP_CONNECTION:
     """
     Inits ldap connection, binds to ldap using username and password, returns ldap connection if binding was ok
 
@@ -47,13 +47,13 @@ def ldap_conn(dc: str, username: str, password: str) -> LDAP_CONNECTION:
     :return: ldap connection if binding was ok, None otherwise
     :rtype: ldap.ldapobject.SimpleLDAPObject
     """
-    conn: ldap.ldapobject.SimpleLDAPObject = ldap.initialize('ldap://%s' % dc)
-    # conn.protocol_version = 3
-    conn.set_option(ldap.OPT_REFERRALS, 0)
-    # conn.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+    ldap_connection: ldap.ldapobject.SimpleLDAPObject = ldap.initialize('ldap://%s' % dc)
+    # ldap_connection.protocol_version = 3
+    ldap_connection.set_option(ldap.OPT_REFERRALS, 0)
+    # ldap_connection.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
     try:
-        conn.bind_s(username, password)
-        return conn
+        ldap_connection.bind_s(username, password)
+        return ldap_connection
     except ldap.INVALID_CREDENTIALS:
         return None
     except ldap.SERVER_DOWN:
@@ -136,7 +136,7 @@ def ad_login(dc: str, username: str, password: str, domain: str, group: str) -> 
     """
     if not dc:
         return False
-    conn = ldap_conn(
+    conn = ldap_connect(
         dc=dc,
         username=username,
         password=password,
