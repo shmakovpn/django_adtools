@@ -1,3 +1,5 @@
+from time import sleep
+
 from django.conf import settings
 from typing import List, Tuple, ContextManager, Optional, TextIO
 # import os
@@ -7,7 +9,6 @@ from django.test import TestCase, override_settings
 from unittest_dataprovider import data_provider
 
 # django_adtools
-# import django_adtools.ad
 from django_adtools.ad.ad_tools import ad_clear_username, ldap_connect
 from django_adtools.dns.discover_dc import DCList, re_ip
 
@@ -15,11 +16,14 @@ from django_adtools.dns.discover_dc import DCList, re_ip
 from dnslib.zoneresolver import ZoneResolver
 from dnslib.server import DNSServer
 
+# emulation of a TCP Server
+import socket
+
+# threading
+from threading import Thread, Lock
+
+# todo
 # emulaiton of a LDAP Server
-# import slapdtest # requires ldapadd (apt install ldap-utils)
-#    and does not work without it, requires slapd (apt install slapd)
-# from ldaptools import slapd
-# from ldap_test import LdapServer
 
 # import logging
 # from django_adtools import logger
@@ -37,6 +41,39 @@ controller.{domain}.          IN   A     127.0.0.1
 _ldap._tcp.dc._msdcs.{domain}.    600   IN   SRV   1 10 {port} {srv_address}."""
 
 domain: str = 'domain.local'  # testing name of the domain
+
+
+class ServerInfo:
+    """
+    Contains information about TCP Server
+    """
+    def __init__(self):
+        self.port: int = 0  # a number of a TCP port
+        self.connection_established: bool = False  # a client has established connetion to the server (True)
+
+    def __str__(self):
+        return f"ServerInfo(port={self.port}, connection_etablished={self.connection_established}"
+
+
+def start_tcp_server(server_info: ServerInfo, lock: Lock) -> None:
+    """
+    Starts a TCP server on a random free port, then waits for connection from a client
+    :param server_info:
+    :type server_info: ServerInfo
+    :param lock:
+    :type lock: Lock
+    :return: None
+    """
+    lock.acquire()  # this lock means that socket is still creating
+    sock: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.bind(('127.0.0.1', 0))  # bind to a random free port
+    sock.listen(1)
+    server_info.port = sock.getsockname()[1]  # save the number of the server port
+    lock.release()  # the socket is created
+    _ = sock.accept()  # blocks here until a connection from a client
+    server_info.connection_established = True
+    sock.close()
 
 
 class TestDiscoverDC(TestCase):
@@ -74,30 +111,27 @@ class TestDiscoverDC(TestCase):
 
     @data_provider(srv_addresses)
     def test_discover(self, srv_address: str):
-
-        # setups the LDAP Server emulator, slapdtest.SlapdObject requires ldapadd and does not work without it
-        # with slapdtest.SlapdObject() as ldap_server:
-        #      print(ldap_server)
-
-        # ldap_server = LdapServer()  # зависает
-        # slapd_server = slapd.Slapd()
-
+        server_info = ServerInfo()
+        lock: Lock = Lock()
+        Thread(target=start_tcp_server, args=(server_info, lock)).start()
+        # waiting for the TCP server emulator thread is coming up
+        lock.acquire()
+        lock.release()
         name_servers: List[str] = ['127.0.0.1']  # the list of nameservers
         # configures the DNS Server
         zone_resolver: ZoneResolver = ZoneResolver(
-            zone=zone_file.format(domain=domain, srv_address=srv_address, port=389),
+            zone=zone_file.format(domain=domain, srv_address=srv_address, port=server_info.port),
         )
         # port=0 means that the DNS Server will choose a free UDP Port
         dns_server: DNSServer = DNSServer(resolver=zone_resolver, port=0, tcp=False)
         dns_server.start_thread()  # start the DNS Server in a separate python thread
+        sleep(0.1)  # waiting for the DNS Server thread is coming up
         port: int = dns_server.server.server_address[1]  # gets the number of the UDP Port
         # discover for domain controllers
         dc_list: DCList = DCList(domain=domain, nameservers=name_servers, port=port)
         self.assertIsNotNone(dc_list.get_dc_list(), 'Could not get a list of Domain Controllers')
         # try to get an available domain controller
-        # todo DCHostname.ping need to emulate ldap server!!!
         dc: str = dc_list.get_available_dc_ip()
-        print(f"dc={dc}")
         self.assertIsNotNone(dc, "Could not get an available Domain Controller")
         # stop DNS Server
         dns_server.server.server_close()
