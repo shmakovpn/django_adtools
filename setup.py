@@ -26,6 +26,7 @@ setup(
     url='https://github.com/shmakovpn/django_adtools',
     download_url=f'https://github.com/shmakovpn/django_ocr_server/archive/{VERSION}.zip',
     long_description=long_description,
+    long_description_content_type='text/x-rst',
     entry_points={
         'console_sripts': [],
     },

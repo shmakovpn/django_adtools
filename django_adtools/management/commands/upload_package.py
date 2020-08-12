@@ -15,7 +15,7 @@ def run_upload():
     base_dir: str = os.path.dirname(os.path.dirname(os.path.dirname(SCRIPT_DIR)))
     dist_dir: str = os.path.join(base_dir, 'dist')
     dist_file: str = os.path.join(dist_dir, f'django-adtools-{VERSION}.tar.gz')
-    os.system(f'twine upload {dist_file}')
+    os.system(f'twine upload --verbose {dist_file}')
     print('__END__')
 
 
