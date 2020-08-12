@@ -154,6 +154,12 @@ Deploying under Linux Centos 7 using Apache
    .. code-block:: bash
    
     sudo setsebool -P httpd_can_network_connect_db 1
+   
+   Allow **httpd** to connect to LDAP
+   
+    .. code-block:: bash
+    
+     sudo setsebool -P httpd_can_connect_ldap on
 
  Run httpd
 
