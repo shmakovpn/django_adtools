@@ -9,17 +9,19 @@ REQUIREMENTS:
 __author__ = "shmakovpn <shmakovpn@yandex.ru>"
 __date__ = "2020-03-04"
 
-from typing import List, Optional
+from typing import List, Optional, Pattern
 import re
 import dns.resolver
 import socket
+import logging
 
-re_ip = re.compile(
+#: Pattern to match IPv4 addresses
+re_ip: Pattern = re.compile(
     r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'
 )
-"""
-Pattern to match an IPv4 address
-"""
+
+#: this __package__ logger
+logger: logging.Logger = logging.getLogger(__package__)
 
 
 class DCHostname:
@@ -74,10 +76,12 @@ class DCHostname:
             try:
                 if sock.connect_ex((dc_ip, self.dc_port,)) == 0:
                     self.dc_ip = dc_ip
+                    sock.close()
                     return True
             except socket.gaierror:
                 pass
         sock.close()
+        logger.error(f'django_adtools.dns DCHostname.ping failed no available controllers in dc_ips={dc_ips}')
         return False
 
     def __str__(self):
@@ -114,7 +118,9 @@ class DCList:
         self.role: str = role
         self.record_type: str = record_type
         self.dns_resolver: dns.resolver.Resolver = dns.resolver.get_default_resolver()
-        self.dns_resolver.nameservers = nameservers
+        if nameservers:
+            logger.info(f'django_adtools.dns DCList init nameservers is "{nameservers}"')
+            self.dns_resolver.nameservers = nameservers
         self.dns_resolver.port = port
 
     def get_dns_query_string(self) -> str:
@@ -163,4 +169,5 @@ class DCList:
         for dc_hostname in dc_hostnames:
             if dc_hostname.dc_ping():
                 return dc_hostname.dc_ip
+        logger.error('django_adtools.dns DCList.get_available_dc_ip() no available dc_ip')
         return ''

@@ -1,12 +1,7 @@
 Django-adtools
 ==============
 
-.. raw:: html
 
-   <p align="center">
-      <a href="https://django-adtools.readthedocs.io/en/latest/"><img alt="Documentation Status" src="https://readthedocs.org/projects/django-adtools/badge/?version=latest" /></a>
-      <a href="https://badge.fury.io/py/django-adtools"><img src="https://badge.fury.io/py/django-adtools.svg" alt="PyPI version" height="18"></a>
-   </p>
 
 Django-adtools is a package with a set of utilities for integrating web applications based on the django framework with
 MS ActiveDirectory.
@@ -19,6 +14,7 @@ Short example of using Active Directory authentication system
  .. code-block:: python
 
   # views.py
+  from django_adtools.ad.ad_tools import ad_login, ad_clear_username
 
   def post(self, request):
       form = LoginForm(request.POST)

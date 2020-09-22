@@ -28,6 +28,7 @@ from threading import Thread, Lock
 # import logging
 # from django_adtools import logger
 from .models import *
+
 # from io import StringIO
 # from django.core.management import call_command
 
@@ -47,6 +48,7 @@ class ServerInfo:
     """
     Contains information about TCP Server
     """
+
     def __init__(self):
         self.port: int = 0  # a number of a TCP port
         self.connection_established: bool = False  # a client has established connetion to the server (True)
@@ -100,7 +102,7 @@ class TestDiscoverDC(TestCase):
         self.assertEqual(bool(re_ip.search(ip_address)), is_valid_ip)
 
     @staticmethod
-    def srv_addresses() -> Tuple[Tuple[str], Tuple[str], ]:
+    def srv_addresses() -> Tuple[Tuple[str], Tuple[str],]:
         """
         Dataprovider for test_discover
         """
@@ -156,6 +158,8 @@ class TestDomainControllerModel(TestCase):
         DomainController.set(ip=ip)
         dc: str = DomainController.get()
         self.assertIsNotNone(dc)
+
+
 #
 #
 # class TestManagementCommands(TestCase):
@@ -217,5 +221,4 @@ class TestADTools(TestCase):
             self.assertGreater(len(groups), 0, f'An empty groups array got for user {dn}')
             print(f"ad_groups: {groups}")
             self.assertIn(settings.ADTOOLS_TEST_GROUP, groups)
-#
-#
+
