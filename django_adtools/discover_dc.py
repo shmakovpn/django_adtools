@@ -1,5 +1,5 @@
 """
-django_adtools/dns/discover_dc.py
+django_adtools/discover_dc.py
 
 This script discovers for domain controllers in domain
 
@@ -81,7 +81,7 @@ class DCHostname:
             except socket.gaierror:
                 pass
         sock.close()
-        logger.error(f'django_adtools.dns DCHostname.ping failed no available controllers in dc_ips={dc_ips}')
+        logger.error(f'{__package__} DCHostname.ping failed no available controllers in dc_ips={dc_ips}')
         return False
 
     def __str__(self):
@@ -119,7 +119,7 @@ class DCList:
         self.record_type: str = record_type
         self.dns_resolver: dns.resolver.Resolver = dns.resolver.get_default_resolver()
         if nameservers:
-            logger.info(f'django_adtools.dns DCList init nameservers is "{nameservers}"')
+            logger.info(f'{__package__} DCList init nameservers is "{nameservers}"')
             self.dns_resolver.nameservers = nameservers
         self.dns_resolver.port = port
 
@@ -169,5 +169,5 @@ class DCList:
         for dc_hostname in dc_hostnames:
             if dc_hostname.dc_ping():
                 return dc_hostname.dc_ip
-        logger.error('django_adtools.dns DCList.get_available_dc_ip() no available dc_ip')
+        logger.error(f'{__package__} DCList.get_available_dc_ip() no available dc_ip')
         return ''

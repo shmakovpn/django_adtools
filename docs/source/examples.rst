@@ -137,7 +137,7 @@ Usage Examples
    from django.contrib.auth.mixins import LoginRequiredMixin
    from .forms import LoginForm
    from django_adtools.models import DomainController
-   from django_adtools.ad.ad_tools import ad_login, ad_clear_username
+   from django_adtools.ad_tools import ad_login, ad_clear_username
    from django.conf import settings
    from django.contrib.auth.models import User
    from django.contrib.auth import login, logout
@@ -245,7 +245,7 @@ Usage Examples
    from django.shortcuts import reverse
    from bs4 import BeautifulSoup
    from django.conf import settings
-   from django_adtools.dns.discover_dc import DCList
+   from django_adtools.discover_dc import DCList
    from django_adtools.models import DomainController
 
 

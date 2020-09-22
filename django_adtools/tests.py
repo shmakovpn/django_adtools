@@ -1,16 +1,16 @@
 from time import sleep
 
 from django.conf import settings
-from typing import List, Tuple, ContextManager, Optional, TextIO
+from typing import List, Tuple
 # import os
 
 # testing libraries
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from unittest_dataprovider import data_provider
 
 # django_adtools
-from django_adtools.ad.ad_tools import ad_clear_username, ldap_connect
-from django_adtools.dns.discover_dc import DCList, re_ip
+from django_adtools.ad_tools import ad_clear_username
+from django_adtools.discover_dc import DCList, re_ip
 
 # emulation of a DNS Server
 from dnslib.zoneresolver import ZoneResolver
@@ -116,6 +116,7 @@ class TestDiscoverDC(TestCase):
         server_info = ServerInfo()
         lock: Lock = Lock()
         Thread(target=start_tcp_server, args=(server_info, lock)).start()
+        sleep(0.01)  # wait for thread
         # waiting for the TCP server emulator thread is coming up
         lock.acquire()
         lock.release()
@@ -196,13 +197,13 @@ class TestADTools(TestCase):
         ldap_password: str = f'a-123456'
         ldap_conn = ldap_conn(dc=domain_controller_ip, username=ldap_username, password=ldap_password)
         if settings.ADTOOLS_TEST_USERNAME and settings.ADTOOLS_TEST_PASSWORD:
-            conn = django_adtools.ad.ad_tools.ldap_connect(
+            conn = django_adtools.ad_tools.ldap_connect(
                 dc=dc,
                 username=settings.ADTOOLS_TEST_USERNAME,
                 password=settings.ADTOOLS_TEST_PASSWORD
             )
             self.assertIsNotNone(conn, 'Could not connect to Domain Controller')
-            dn: str = django_adtools.ad.ad_tools.user_dn(
+            dn: str = django_adtools.ad_tools.user_dn(
                 conn=conn,
                 username=settings.ADTOOLS_TEST_USERNAME,
                 domain=settings.ADTOOLS_DOMAIN
@@ -212,7 +213,7 @@ class TestADTools(TestCase):
                 f'Could not get a Distinguished Name of user: {settings.ADTOOLS_TEST_USERNAME}'
             )
             print(f"Distinguished Name of user: {settings.ADTOOLS_TEST_USERNAME} is {dn}")
-            groups: List[str] = django_adtools.ad.ad_tools.dn_groups(
+            groups: List[str] = django_adtools.ad_tools.dn_groups(
                 conn=conn,
                 dn=dn,
                 domain=settings.ADTOOLS_DOMAIN

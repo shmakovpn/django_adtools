@@ -1,6 +1,5 @@
-=============
 Configuration
 =============
 
- .. include:: chunks/settings_adtools.rst
+.. include:: chunks/settings_adtools.rst
 

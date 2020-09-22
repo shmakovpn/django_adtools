@@ -1,5 +1,5 @@
 """
-django_adtools/ad/ad_tools.py
+django_adtools/ad_tools.py
 
 Some tools to use
 
@@ -61,11 +61,11 @@ def ldap_connect(dc: str, username: str, password: str) -> LDAP_CONNECTION:
         ldap_connection.bind_s(username, password)
         return ldap_connection
     except ldap.INVALID_CREDENTIALS:
-        logger.warning(f'django_adtools.ad.ad_tools ldap_connect failed, ldap.INVALID_CREDENTIALS '
+        logger.warning(f'{__package__} ldap_connect failed, ldap.INVALID_CREDENTIALS '
                        f'dc={dc}, username={username}, password={password}')
         return None
     except ldap.SERVER_DOWN:
-        logger.error(f'django_adtools.ad.ad_tools ldap_connect failed, ldap.SERVER_DOWN dc={dc}')
+        logger.error(f'{__package__} ldap_connect failed, ldap.SERVER_DOWN dc={dc}')
         return None
 
 
@@ -83,7 +83,7 @@ def user_dn(conn: ldap.ldapobject.SimpleLDAPObject, username: str, domain: str) 
     :rtype: str
     """
     if not conn:
-        logger.error(f'django_adtools.ad.ad_tools user_dn failed "conn" is null')
+        logger.error(f'{__package__} user_dn failed "conn" is null')
         return ''
     ldap_base: str = ','.join('dc=%s' % x for x in domain.split('.'))
     search_filter: str = '(|(&(objectClass=person)(sAMAccountName=%s)))' % ad_clear_username(username)
@@ -92,12 +92,12 @@ def user_dn(conn: ldap.ldapobject.SimpleLDAPObject, username: str, domain: str) 
             filter(lambda x: x[0] is not None, conn.search_s(ldap_base, ldap.SCOPE_SUBTREE, search_filter, ['']))
         )
         if not len(results):
-            logger.warning(f'django_adtools.ad.ad_tools user_dn failed:'
+            logger.warning(f'{__package__} user_dn failed:'
                            f' results is empty, ldap_base={ldap_base}, search_filter={search_filter}')
             return ''
         return results[0][0]
     except ldap.OPERATIONS_ERROR as e:
-        logger.error(f'django_adtools.ad.ad_tools user_dn failed:'
+        logger.error(f'{__package__} user_dn failed:'
                      f' {str(e)}, ldap_base={ldap_base}, search_filter={search_filter}')
         return ''
 
@@ -128,10 +128,10 @@ def dn_groups(conn: ldap.ldapobject.SimpleLDAPObject, dn: str, domain: str) -> L
             )
         )
         if not results:
-            logger.error(f'django_adtools.ad.ad_tools dn_group failed. results is empty, dn={dn}, domain={domain}')
+            logger.error(f'{__package__} dn_group failed. results is empty, dn={dn}, domain={domain}')
         return [item[1]['sAMAccountName'][0].decode() for item in results]
     except ldap.OPERATIONS_ERROR as e:
-        logger.error(f'django_adtools.ad.ad_tools dn_group failed: {str(e)}, dn={dn}, domain={domain}')
+        logger.error(f'{__package__} dn_group failed: {str(e)}, dn={dn}, domain={domain}')
         return []
 
 
@@ -153,7 +153,7 @@ def ad_login(dc: str, username: str, password: str, domain: str, group: str) -> 
     :rtype: bool
     """
     if not dc:
-        logger.error(f'django_adtools.ad.ad_tools ad_login failed. "dc" is null')
+        logger.error(f'{__package__} ad_login failed. "dc" is null')
         return False
     conn = ldap_connect(
         dc=dc,
@@ -161,7 +161,7 @@ def ad_login(dc: str, username: str, password: str, domain: str, group: str) -> 
         password=password,
     )
     if not conn:
-        logger.error(f'django_adtools.ad.ad_tools ad_login failed.'
+        logger.error(f'{__package__} ad_login failed.'
                      f' "ldap_connect" failed dc={dc}, username={username}, password={password}')
         return False
     dn = user_dn(
@@ -170,7 +170,7 @@ def ad_login(dc: str, username: str, password: str, domain: str, group: str) -> 
         domain=domain,
     )
     if not dn:
-        logger.error(f'django_adtools.ad.ad_tools ad_login failed.'
+        logger.error(f'{__package__} ad_login failed.'
                      f' "user_dn" failed dc={dc}, username={username}, password={password}')
         return False
     groups = dn_groups(
@@ -179,12 +179,12 @@ def ad_login(dc: str, username: str, password: str, domain: str, group: str) -> 
         domain=domain,
     )
     if not groups:
-        logger.error(f'django_adtools.ad.ad_tools ad_login failed.'
+        logger.error(f'{__package__} ad_login failed.'
                      f' "dn_goups" failed dc={dc}, username={username}, password={password}')
         return False
     if not group or group in groups:
         return True  # user is authenticated
     else:
-        logger.error(f'django_adtools.ad.ad_tools ad_login failed.'
+        logger.error(f'{__package__} ad_login failed.'
                      f' group={groups} not in {groups}.  dc={dc}, username={username}, password={password}')
         return False

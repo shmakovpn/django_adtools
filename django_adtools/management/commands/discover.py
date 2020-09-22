@@ -8,7 +8,7 @@ __date__ = '2020-06-05'
 import os
 from django.core.management.base import BaseCommand
 from django_adtools.models import DomainController
-from django_adtools.dns.discover_dc import DCList
+from django_adtools.discover_dc import DCList
 from django.conf import settings
 from typing import List
 

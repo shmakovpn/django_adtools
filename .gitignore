@@ -43,3 +43,6 @@ logging_example/
 
 # pytest
 .pytest_cache/
+
+# exclouded folders
+windows_install/
