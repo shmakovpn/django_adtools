@@ -148,6 +148,18 @@ Deploying under Linux Centos 7 using Apache
 
     sudo semanage fcontext -a -t httpd_sys_script_exec_t '/var/www/$PROJECT_NAME/venv(/.*)?'
     sudo restorecon -Rv /var/www/$PROJECT_NAME/venv
+  
+  Allow **httpd** to connect to database
+  
+   .. code-block:: bash
+   
+    sudo setsebool -P httpd_can_network_connect_db 1
+   
+  Allow **httpd** to connect to LDAP
+   
+   .. code-block:: bash
+    
+    sudo setsebool -P httpd_can_connect_ldap on
 
  Run httpd
 
