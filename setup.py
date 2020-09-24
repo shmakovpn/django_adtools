@@ -8,11 +8,20 @@ __date__ = '2020-06-08'
 
 import os
 from setuptools import setup, find_packages
-from django_adtools.version import VERSION
 
 # allow setup.py to be run from any path
 SCRIPT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 os.chdir(SCRIPT_DIR)
+
+# reading version information
+# NOTE:
+# "from django_adtools.version import VERSION" will no work
+# because setup.py run before dependencies have to be installed
+# thus, "ldap" package may be not found
+PACKAGE_DIR: str = os.path.join(SCRIPT_DIR, 'django_adtools')
+VERSION: str = None
+with open(os.path.join(PACKAGE_DIR, 'version.py'), 'r') as version_file:
+    exec(version_file.read())
 
 with open('README.rst') as f:
     long_description: str = f.read()
