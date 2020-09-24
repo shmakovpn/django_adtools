@@ -16,7 +16,7 @@ Deploying under Linux Centos 7 using Apache
    sudo yum install -y httpd
    sudo sed -i /etc/sysconfig/httpd -re 's/^(LANG=C)/#\1/'
    sudo yum install -y httpd-devel
-   sudo pip install mod_wsgi
+   sudo pip3 install mod_wsgi
    sudo yum install -y postgresql-server
    sudo -i -u postgres /bin/postgresql-setup initdb
    sudo -i -u postgres sed -i data/pg_hba.conf -e 's/ident/md5/'
